@@ -2,13 +2,24 @@ import React, { useContext, useState } from 'react';
 import planetContext from '../context/context';
 
 function Filter() {
-  const { nameFilter, setNameFilter } = useContext(planetContext);
+  const { filterName, getfilterByName } = useContext(planetContext);
   const { columnFilter, setColumnFilter } = useContext(planetContext);
   const [column, setColumn] = useState('population');
   const [comparison, setComparison] = useState('maior que');
   const [value, setValue] = useState('0');
-
   const buildFilter = () => ({ column, comparison, value });
+  const columnsArray = [
+    'population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water',
+  ];
+
+  const verifyColumn = (string) => {
+    const result = !(columnFilter.some((filter) => filter.column === string));
+    return result;
+  };
 
   return (
     <div>
@@ -18,8 +29,8 @@ function Filter() {
           id="filter"
           name="filterByName"
           data-testid="name-filter"
-          value={ nameFilter }
-          onChange={ (e) => setNameFilter(e.target.value) }
+          value={ filterName }
+          onChange={ (e) => getfilterByName(e.target.value) }
         />
       </label>
       <label htmlFor="filterByColumn">
@@ -31,11 +42,14 @@ function Filter() {
           value={ column }
           onChange={ (e) => setColumn(e.target.value) }
         >
-          <option value="population">population</option>
-          <option value="orbital_period">orbital_period</option>
-          <option value="diameter">diameter</option>
-          <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option>
+          { columnsArray
+            .filter((item) => verifyColumn(item))
+            .map((element) => (
+              <option key={ element } value={ element }>
+                {element}
+              </option>
+            )) }
+
         </select>
       </label>
       <label htmlFor="comparison">
@@ -72,14 +86,19 @@ function Filter() {
       </button>
       { columnFilter.length > 0 && <p>Seus Filtros:</p> }
       { columnFilter.length > 0
-      && columnFilter.map((filter, index) => (
-        <div key={ index }>
-          <p>
-            {`Comparando a coluna ${filter.column} sendo
+ && columnFilter.map((filter) => (
+   <div key={ filter.column }>
+     <p>
+       {`Comparando a coluna ${filter.column} sendo
           ${filter.comparison} o número ${filter.value}`}
-          </p>
-        </div>
-      ))}
+     </p>
+     <button
+       type="button"
+     >
+       Deletar Filtro
+     </button>
+   </div>
+ ))}
     </div>
   );
 }
